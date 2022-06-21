@@ -2,7 +2,7 @@ ROOT_CN := Panubo Root TEST 2022
 INTERMEDIATE_CN := Panubo Intermediate TEST 2022 G1
 
 SERVER_CN := mtls-server.panubo.com
-SERVER_SAN := mtls-server.panubo.com,server.panubo.com
+SERVER_SAN := 127.0.0.1,localhost,mtls-server.panubo.com
 
 CLIENT_CN := E40596F3-458E-4FAF-8A08-F539FD6B3575
 
@@ -57,7 +57,11 @@ certs/server.crt: certs/server.json
 certs/server.key: certs/server.json
 	jq -r .key certs/server.json > certs/server.key
 
-server: certs/server.crt certs/server.key ## Generate server CA
+# Server bundle of key, certificate and intermediate certificate
+certs/server.pem: certs/server.key certs/server.crt certs/intermediate.crt
+	cat certs/server.key certs/server.crt certs/intermediate.crt > certs/server.pem
+
+server: certs/server.crt certs/server.key certs/server.pem ## Generate server CA
 
 show-server: certs/server.crt ## Show openssl output for server certificate
 	openssl x509 -noout -text -in certs/server.crt
@@ -71,7 +75,10 @@ certs/client.crt: certs/client.json
 certs/client.key: certs/client.json
 	jq -r .key certs/client.json > certs/client.key
 
-client: certs/client.crt certs/client.key ## Generate client CA
+certs/client.pem: certs/client.key certs/client.crt certs/intermediate.crt
+	cat certs/client.key certs/client.crt certs/intermediate.crt > certs/client.pem
+
+client: certs/client.crt certs/client.key certs/client.pem ## Generate client CA
 
 show-client: certs/client.crt ## Show openssl output for client certificate
 	openssl x509 -noout -text -in certs/client.crt
