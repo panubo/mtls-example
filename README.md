@@ -102,6 +102,15 @@ X-Ssl-Client-Dn: /C=AU/ST=New South Wales/O=Panubo/CN=E40596F3-458E-4FAF-8A08-F5
 X-Ssl-Client-Dn: CN=E40596F3-458E-4FAF-8A08-F539FD6B3575,O=Panubo,ST=New South Wales,C=AU
 ```
 
+**Note** the HAProxy `X-Ssl-Client-Verify` is a misleading variable. From the HAProxy docs
+
+> ssl_c_verify : integer
+>
+> Returns the verify result error ID when the incoming connection was made over
+> an SSL/TLS transport layer, otherwise zero if no error is encountered. Please
+> refer to your SSL library's documentation for an exhaustive list of error
+> codes.
+
 ## References
 
 [SSL Client Certificate Information in HTTP Headers and Logs](https://www.haproxy.com/blog/ssl-client-certificate-information-in-http-headers-and-logs/)
