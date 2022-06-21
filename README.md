@@ -1,23 +1,21 @@
 # mTLS example
 
-Generates RootCA, Intermediate CA, Server Certificate, Client Certificate (with cfssl). Run mTLS load balancer (nginx or haproxy), a minio S3 backend and echo-server backend. Provide example curl commands and python example client code.
-
-The load balancer should be configured to pass some mTLS related headers, these should be similar to what can be configured with AWS API Gateway.
-
-Client examples should additionally show the importance of server verification and intermediate certificates.
+The repo contains code and config to generate a x509 CA, intermediate CA, server and client certificates. It is intended to demonstrate mutual TLS authentication (mTLS).
 
 ## Requires
 
-* cfssl
+* [cfssl](https://github.com/cloudflare/cfssl) install with `brew install cfssl` [https://formulae.brew.sh/formula/cfssl](https://formulae.brew.sh/formula/cfssl)
 * jq
 * make
-* docker
+* docker and docker-compose
 
 ## Usage
 
 ```
 make all
 ```
+
+Certificates are created in `certs/`.
 
 ## Certificate Subject
 
