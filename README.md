@@ -9,7 +9,7 @@ The repo contains code and config to generate a x509 CA, intermediate CA, server
 * make
 * docker and docker-compose
 
-## Usage
+## Generate Certificates
 
 ```
 make all
@@ -17,31 +17,33 @@ make all
 
 Certificates are created in `certs/`.
 
-## Certificate Subject
+### Certificate Subject
 
-The default certificate subject values are in `config/csr_ecdsa.json`. They can be overwritten by creating a new CSR json using `config/csr_ecds.json` as an example. You can then generate certificate using the new CSR json.
+The default certificate subject values are in `config/csr_ecdsa.json`. They can be overwritten by creating a new CSR json using `config/csr_ecds.json` as an example. You can then generate a certificate using the new CSR json:
 
 ```
 make all DEFAULT_CSR=mycsr.json
 ```
 
-Additionally you may want to overwrite different values for different certificates. For example
+Additionally you may want to overwrite different values for different certificates. For example:
 
 ```
 make all DEFAULT_CSR=mycsr.json CLIENT_CSR=myclientcsr.json
 ```
 
-## Intermediate certificate
+### Intermediate certificate
 
 This example uses an intermediate certificate which is common for most public key infrastructure (PKI).
 
 In the examples below the servers and client use the Root CA for validation and the opposite party is required to offer both the end certificate (client.crt or server.crt) and the intermediate certificate (not the intermediate private key). The `certs/server.pem` and `certs/client.pem` bundles each contain a private key, end certificate and the intermediate certificate, without the intermediate certificate the validation would fail.
 
-## Examples
+## Testing
 
-Start the servers by running `docker-compose up`. Then following the examples below.
+You can test the certificates using Docker and the docker-compose configuration included here.
 
-Ports:
+Start the servers by running `docker-compose up`. Then following the instructions below.
+
+Ports used:
 
 * `8081` - echoserver no TLS
 * `8082` - haproxy TLS with optional client validation
@@ -75,7 +77,7 @@ $ curl --cacert ./certs/ca.crt --cert ./certs/client.pem https://127.0.0.1:8084
 
 ### Python
 
-The python client example validates the server certificate and sends the client certificate for validation.
+The Python client example validates the server certificate and sends the client certificate for validation:
 
 ```
 cd python-client
