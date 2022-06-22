@@ -123,3 +123,4 @@ X-Ssl-Client-Dn: CN=E40596F3-458E-4FAF-8A08-F539FD6B3575,O=Panubo,ST=New South W
 * Further explore server side possibilities with optional client verify (direct authenticated vs unauthenticated to different backends)
 * Demonstrate the importance of certificate usages
 * Document server name validation (SAN)
+* Include ingress-nginx example [NGINX Ingress Controller: Client Certificate Authentication](https://kubernetes.github.io/ingress-nginx/examples/auth/client-certs/)
