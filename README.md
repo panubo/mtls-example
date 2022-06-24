@@ -11,7 +11,7 @@ The repo contains code and config to generate a x509 CA, intermediate CA, server
 
 ## Generate Certificates
 
-```
+```shell
 make all
 ```
 
@@ -21,13 +21,13 @@ Certificates are created in `certs/`.
 
 The default certificate subject values are in `config/csr_ecdsa.json`. They can be overwritten by creating a new CSR json using `config/csr_ecds.json` as an example. You can then generate a certificate using the new CSR json:
 
-```
+```shell
 make all DEFAULT_CSR=mycsr.json
 ```
 
 Additionally you may want to overwrite different values for different certificates. For example:
 
-```
+```shell
 make all DEFAULT_CSR=mycsr.json CLIENT_CSR=myclientcsr.json
 ```
 
@@ -52,7 +52,7 @@ Ports used:
 
 ### Curl
 
-```
+```shell
 # Make a request to the server without any validation - the request should fail
 $ curl https://127.0.0.1:8082
 
@@ -79,7 +79,7 @@ $ curl --cacert ./certs/ca.crt --cert ./certs/client.pem https://127.0.0.1:8084
 
 The Python client example validates the server certificate and sends the client certificate for validation:
 
-```
+```shell
 cd python-client
 python -m venv .venv
 . .venv/bin/activate
@@ -92,7 +92,7 @@ deactivate
 
 ### Headers
 
-Both the HAProxy and Nginx example servers return headers to the backend about the client certificate. Unfortunately these headers differ between the two servers and will likely be different again with another load balancer. The `X-Ssl-Client-Dn` is likely the most consistent and common but it needs to be parsed. HAProxy separates the fields in the DN with `/` where nginx uses `,` however both provide the same fields.
+Both the HAProxy and Nginx example servers return headers to the backend about the client certificate. Unfortunately these headers differ between the two servers and will likely be different again with another load balancer. The `X-Ssl-Client-Dn` is likely the most consistent and common but it needs to be parsed. HAProxy separates the fields in the DN with `/` where nginx uses `,` however both provide the same fields. Note that the Nginx Ingress Controller uses yet another set of headers.
 
 ```
 # HAProxy
@@ -100,6 +100,9 @@ X-Ssl-Client-Dn: /C=AU/ST=New South Wales/O=Panubo/CN=E40596F3-458E-4FAF-8A08-F5
 
 # Nginx
 X-Ssl-Client-Dn: CN=E40596F3-458E-4FAF-8A08-F539FD6B3575,O=Panubo,ST=New South Wales,C=AU
+
+# Nginx Ingress Controller (Kubernetes)
+Ssl-Client-Subject-Dn: CN=E40596F3-458E-4FAF-8A08-F539FD6B3575,O=Panubo,ST=New South Wales,C=AU
 ```
 
 **Note** the HAProxy `X-Ssl-Client-Verify` is a misleading variable. From the HAProxy docs
@@ -111,11 +114,31 @@ X-Ssl-Client-Dn: CN=E40596F3-458E-4FAF-8A08-F539FD6B3575,O=Panubo,ST=New South W
 > refer to your SSL library's documentation for an exhaustive list of error
 > codes.
 
+## NGINX Ingress Controller
+
+The Kubernetes [NGINX Ingress Controller](https://kubernetes.github.io/ingress-nginx/) supports mTLS, called ["Client Certificate Authentication"](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/#client-certificate-authentication).
+
+Configuring this requires the following:
+
+- `targetPorts.https: 443` configured in the ingress controller
+- `annotations.nginx.ingress.kubernetes.io/auth-tls-secret: "my-namespace/ca-secret"` configured in the ingress
+- `tls.secretName: "my-namespace/tls-secret"` configured in the ingress.
+
+The `ca-secret` and `tls-secret` can be created as follows:
+
+```shell
+# create bundled tls-secret for the server
+cat server.crt intermediate.crt > bundle.crt
+kubectl create secret tls tls-secret --key server.key --cert bundle.crt
+
+# create the "secret" containg the CA certificate only
+kubectl create secret generic ca-secret --from-file=ca.crt=ca.crt
+```
+
 ## References
 
-[SSL Client Certificate Information in HTTP Headers and Logs](https://www.haproxy.com/blog/ssl-client-certificate-information-in-http-headers-and-logs/)
-
-[Module ngx_http_ssl_module](https://nginx.org/en/docs/http/ngx_http_ssl_module.html)
+- [SSL Client Certificate Information in HTTP Headers and Logs](https://www.haproxy.com/blog/ssl-client-certificate-information-in-http-headers-and-logs/)
+- [Module ngx_http_ssl_module](https://nginx.org/en/docs/http/ngx_http_ssl_module.html)
 
 ## Further ideas
 
